@@ -180,7 +180,11 @@ export function parseV4a(lines: string[], strict: boolean): Edit[] {
         if (isSectionStart(l)) break;
         if (l.startsWith('@@')) {
           if (cur !== null) chunks.push(cur);
-          cur = { anchor: l.slice(2).trim(), body: [], eof: false };
+          // SPEC.md section 8: the text after `@@` is the chunk's anchor, and an
+          // empty text is no anchor — a bare `@@` line must not search for an
+          // empty line, it leaves the chunk unanchored.
+          const anchorText = l.slice(2).trim();
+          cur = { anchor: anchorText === '' ? null : anchorText, body: [], eof: false };
           firstChunk = false;
           j += 1;
           continue;
